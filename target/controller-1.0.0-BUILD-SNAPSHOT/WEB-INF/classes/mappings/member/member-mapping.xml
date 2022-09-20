@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="MemberDAO">
+	<resultMap id="member" type="member">
+		<id property="seq" column="SEQ" />
+		<id property="id" column="ID" />
+		<result property="name" column="NAME" />
+		<result property="pwd" column="MEMBER_PWD" />
+		<result property="date" column="MEMBER_DATE" />
+		<result property="email" column="MEMBER_EMAIL" />
+		<result property="tel" column="TEL" />
+		<result property="sample6_postcode" column="SAMPLE6_POSTCODE" />
+		<result property="sample6_address" column="SAMPLE6_ADDRESS" />
+		<result property="sample6_detailAddress" column="SAMPLE6_DEATAILADDRESS" />
+	</resultMap>
+
+	<select id="checkID" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM MEMBER
+		WHERE ID=#{id}
+	</select>
+
+	<select id="checkMember" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM MEMBER
+		WHERE ID=#{id} AND PWD=#{pwd}
+	</select>
+
+	<insert id="insertMember">
+		<![CDATA[
+		INSERT INTO MEMBER (
+			SEQ,
+			ID,
+			PWD,
+			NAME,
+			EMAIL,
+			TEL,
+			ZIPCODE,
+			FADDR,
+			LADDR
+		) VALUES(
+			SEQ.NEXTVAL,
+			#{id},
+			#{pwd},
+			#{name},
+			DATE(#{year}, 'yyyy-mm-dd'),
+			#{email},
+			#{tel},
+			#{sample6_postcode},
+			#{sample6_address},
+			#{sample6_detailAddress}
+		)
+		]]>
+	</insert>
+	
+	<update id="updateMember">
+		UPDATE MEMBER
+		SET
+		PWD = #{pwd},
+		EMAIL = #{email},
+		TEL = #{tel},
+		sample6_address = #{sample6_address},
+		sample6_address = #{sample6_address},
+		sample6_postcode = #{sample6_postcode}
+		WHERE
+		ID = #{id}
+	</update>
+	
+	<select id="login" resultMap="member">
+		<![CDATA[
+			SELECT * FROM MEMBER
+			WHERE ID=#{id} AND PWD=#{pwd}
+		]]>
+	</select>
+
+	<select id="getAll" resultMap="member">
+		SELECT * FROM MEMBER
+	</select>
+
+	<delete id="deleteMember">
+		DELETE FROM MEMBER WHERE
+		MEMBER_ID = #{member_id}
+	</delete>
+	
+	<select id="orderMember" resultType="payment">
+		SELECT * FROM(
+			SELECT ROWNUM AS RN, A.* FROM (
+				SELECT * FROM (
+					SELECT PRD_ID, PAYMENT_ID, PAYMENT_DATE, PRD_NAME, DELIVERY,
+					((PRD_PRICE - PRD_DISCOUNT) * BUY_QUANTITY + PRD_DELIVERY) AS PRD_SUM 
+					FROM PRODUCT_PAYMENT NATURAL JOIN PRODUCT_INFO WHERE MEMBER_ID = #{member_id}
+					<include refid="myp"></include>
+				) ORDER BY PAYMENT_DATE DESC
+			) A
+		) WHERE RN BETWEEN #{start} AND #{end}
+	</select>
+	
+	<select id="orderCount" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM PRODUCT_PAYMENT WHERE MEMBER_ID = #{member_id}
+	</select>
+	
+	<select id="forgotPWChkMember" resultType="java.lang.Integer">
+		SELECT COUNT(*) FROM MEMBER WHERE MEMBER_ID=#{member_id} AND MEMBER_NAME=#{member_name}
+	</select>
+	
+	<update id="forgotPWUpdate">
+		UPDATE MEMBER SET MEMBER_PWD=#{member_pwd} WHERE MEMBER_ID=#{member_id} AND MEMBER_NAME=#{member_name}
+	</update>
+	
+	<sql id="myp">
+		AND PAYMENT_DATE BETWEEN ADD_MONTHS(SYSDATE, -3) AND SYSDATE
+	</sql>
+</mapper>

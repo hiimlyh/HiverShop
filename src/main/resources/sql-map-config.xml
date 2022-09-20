@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration 
+PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<!-- Alias 설정 -->
+	<typeAliases>
+		<typeAlias alias="member" type="com.hivershop.model.member.MemberVO" />
+		<typeAlias alias="payment" type="com.hivershop.model.payment.PaymentVO" />
+	</typeAliases>
+	
+	<!-- Sql Mapper 설정 -->
+	<!-- 회원 -->
+	<mappers>
+		<mapper resource="mappings/member/member-mapping.xml" />
+		<mapper resource="mappings/product/payment-mapping.xml" />
+	</mappers>
+</configuration>
